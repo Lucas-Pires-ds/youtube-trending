@@ -11,13 +11,17 @@ if API_KEY is None:
 
 youtube = build("youtube", "v3", developerKey=API_KEY)
 
+
 def get_video_categories(region_code):
     data = (youtube.videoCategories()
                         .list(part="snippet", 
                             regionCode=region_code)
                             .execute()
-            )
-    return data["items"]
+            )["items"]
+    assignable_filtered = [i for i in data if i["snippet"]["assignable"]]
+
+    return assignable_filtered
+
 
 def get_trending_videos(category_id, region_code):
     data = (youtube.videos()

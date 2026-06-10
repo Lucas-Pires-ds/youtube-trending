@@ -21,7 +21,7 @@ YouTube Data API v3
    dbt Core (transformação)
         │
         ▼
-   Metabase / Evidence (BI)
+   Power BI 
 ```
 
 ## Stack
@@ -31,7 +31,7 @@ YouTube Data API v3
 | Coleta | Python + Google API Client |
 | Armazenamento | DuckDB |
 | Transformação | dbt Core |
-| Visualização | Metabase / Evidence |
+| Visualização | Power BI |
 
 ## Modelagem dbt
 
