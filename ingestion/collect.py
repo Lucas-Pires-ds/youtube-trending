@@ -1,20 +1,31 @@
 #%%
 from youtube_client import get_video_categories, get_trending_videos, get_channel_stats
+from database import insert_categories, insert_videos, insert_channels
 from datetime import datetime
 from googleapiclient.errors import HttpError
-from pprint import pprint
+import duckdb
+from pathlib import Path
+
+#%%
 
 if __name__ == "__main__":
 
+    BASE = Path(__file__).parent.parent
+    output_path = BASE / "data"
+
+    con = duckdb.connect(output_path / 'youtube.duckdb')
+
     # coleta as categorias de canais disponiveis com assignable = True
     
-    categories = get_video_categories(region_code="BR")
+    categories_list = get_video_categories(region_code="BR")
+    for category in categories_list:
+        category["collect_date"] = datetime.today()
 
     # itera sobre a lista de categorias coletando o top 50 videos mais assistidos 
     # de cada categoria
 
     all_videos = []
-    for category in categories:
+    for category in categories_list:
 
         try:
             videos_list = get_trending_videos(category_id= category["id"], region_code= "BR")
@@ -40,4 +51,13 @@ if __name__ == "__main__":
 
     for channel in channels_list:
         channel["collect_date"] = datetime.today()
+
+    insert_categories(con = con, categories= categories_list)
+
+    insert_videos(con = con, videos= all_videos)
+
+    insert_channels(con = con, channels= channels_list)
+
+    con.commit()
+    con.close()
 
