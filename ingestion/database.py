@@ -1,55 +1,51 @@
 #%%
-from pathlib import Path
-import duckdb
+def create_db(con):
 
-BASE = Path(__file__).parent.parent
-output_path = BASE / "data"
+    sql_command = """
 
-con = duckdb.connect(output_path / 'youtube.duckdb')
+    CREATE SCHEMA IF NOT EXISTS raw;
 
-sql_command = """
+    CREATE TABLE IF NOT EXISTS raw.channels (
+        channel_id VARCHAR(100),
+        channel_name VARCHAR(100),
+        country VARCHAR(100),
+        subscriber_count BIGINT,
+        view_count BIGINT,
+        video_count INTEGER,
+        created_at TIMESTAMP,
+        collected_at DATE,
 
-CREATE SCHEMA IF NOT EXISTS raw;
+        PRIMARY KEY (channel_id, collected_at)
+    );
 
-CREATE TABLE IF NOT EXISTS raw.channels (
-    channel_id VARCHAR(100) PRIMARY KEY,
-    channel_name VARCHAR(100),
-    country VARCHAR(100),
-    subscriber_count BIGINT,
-    view_count BIGINT,
-    video_count INTEGER,
-    created_at TIMESTAMP,
-    collected_at DATE
-);
+    CREATE TABLE IF NOT EXISTS raw.videos (
+        video_id VARCHAR(100),
+        title VARCHAR(100),
+        channel_id VARCHAR(100),
+        category_id VARCHAR(100),
+        searched_id VARCHAR(100),
+        published_at TIMESTAMP,
+        collected_at DATE,
+        view_count BIGINT,
+        like_count INTEGER,
+        comment_count INTEGER,
+        trending_rank INTEGER,
+        region_code VARCHAR(100),
 
-CREATE TABLE IF NOT EXISTS raw.videos (
-    video_id VARCHAR(100),
-    title VARCHAR(100),
-    channel_id VARCHAR(100),
-    category_id VARCHAR(100),
-    searched_id VARCHAR(100),
-    published_at TIMESTAMP,
-    collected_at DATE,
-    view_count BIGINT,
-    like_count INTEGER,
-    comment_count INTEGER,
-    trending_rank INTEGER,
-    region_code VARCHAR(100),
+        PRIMARY KEY (video_id, searched_id, collected_at)
+    );
 
-    PRIMARY KEY (video_id, searched_id, collected_at)
-);
+    CREATE TABLE IF NOT EXISTS raw.categories (
+        category_id VARCHAR(100) PRIMARY KEY, 
+        category_name VARCHAR(100), 
+        collected_at DATE
+    );
+    """
 
-CREATE TABLE IF NOT EXISTS raw.categories (
-    category_id VARCHAR(100) PRIMARY KEY, 
-    category_name VARCHAR(100), 
-    collected_at DATE
-);
-"""
+    con.execute(sql_command)
+    print("Tabela criada com sucesso.")
 
-con.execute(sql_command)
-print("Tabela criada com sucesso.")
 
-con.close()
 
 def insert_videos(con, videos):
 
@@ -123,3 +119,4 @@ def insert_channels(con, channels):
                         channel["collect_date"]
                         ]
                     )
+        
